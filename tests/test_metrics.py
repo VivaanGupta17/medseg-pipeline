@@ -211,7 +211,8 @@ class TestSegmentationMetrics:
         tgt[3:7, 3:7, 3:7] = 1
 
         result = metrics.compute_all(pred, tgt)
-        assert result["mean_dice"] < 0.5
+        # Class 1 Dice should be 0 (missed all foreground)
+        assert result["class_dice"][1] == pytest.approx(0.0, abs=1e-3)
 
     def test_batch_metrics_averaged(self, metrics):
         preds   = [np.random.randint(0, 4, (20, 20)) for _ in range(5)]

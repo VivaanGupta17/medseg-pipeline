@@ -40,7 +40,10 @@ from torch.cuda.amp import GradScaler, autocast
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
-from ..evaluation.metrics import SegmentationMetrics
+try:
+    from ..evaluation.metrics import SegmentationMetrics
+except ImportError:
+    from evaluation.metrics import SegmentationMetrics
 
 logger = logging.getLogger(__name__)
 
