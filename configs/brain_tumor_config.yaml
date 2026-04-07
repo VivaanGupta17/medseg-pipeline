@@ -1,0 +1,145 @@
+# ============================================================================
+# MedSeg Pipeline — Brain Tumour Segmentation Training Configuration
+# Dataset: BraTS 2021 (RSNA-ASNR-MICCAI)
+# Task: Multi-class segmentation (NCR/NET, Edema, Enhancing Tumour)
+# ============================================================================
+
+# ---------------------------------------------------------------------------
+# Dataset
+# ---------------------------------------------------------------------------
+dataset:
+  name: brats2021
+  data_root: /data/brats2021/train          # Update to your local path
+  split_ratios: [0.70, 0.15, 0.15]          # train / val / test
+  seed: 42                                   # Patient-level split seed
+  num_classes: 4                             # 0=BG, 1=NCR, 2=ED, 3=ET
+  slice_2d: false                            # true for 2-D slicewise training
+  normalize: true                            # Per-volume z-score normalisation
+  cache_data: false                          # Cache volumes in RAM
+
+# ---------------------------------------------------------------------------
+# Data Loading
+# ---------------------------------------------------------------------------
+dataloader:
+  batch_size: 2                              # 3-D volumes; increase for 2-D
+  num_workers: 8
+  pin_memory: true
+  prefetch_factor: 2
+
+# ---------------------------------------------------------------------------
+# Augmentation
+# ---------------------------------------------------------------------------
+augmentation:
+  enabled: true
+  p: 0.5                                    # Probability of applying augmentation
+  flip_axes: [0, 1]                         # Axial & coronal flips
+  rotate_range: 15.0                        # ±15° rotation
+  scale_range: [0.85, 1.15]                 # Zoom range
+  brightness_range: 0.1                     # Additive brightness delta
+  noise_std: 0.02                           # Gaussian noise std
+  elastic_alpha: 15.0                       # Elastic deformation magnitude
+  elastic_sigma: 3.0                        # Elastic deformation smoothness
+
+# ---------------------------------------------------------------------------
+# Model
+# ---------------------------------------------------------------------------
+model:
+  architecture: attention_unet              # unet | attention_unet
+  in_channels: 4                            # T1, T1ce, T2, FLAIR
+  num_classes: 4
+  spatial_dims: 2                           # 2 for slicewise, 3 for patch
+  features: [64, 128, 256, 512]             # Encoder channel widths
+  norm_type: batch                          # batch | instance
+  dropout_p: 0.1                            # Enable MC Dropout (set 0 to disable)
+  residual: false
+
+# ---------------------------------------------------------------------------
+# Loss
+# ---------------------------------------------------------------------------
+loss:
+  type: combined_dice_ce                    # combined_dice_ce | tversky | dice
+  dice_weight: 0.5
+  ce_weight: 0.5
+  ignore_index: -100                        # -100 = include all classes
+  # Per-class weights to handle imbalance (BG:NCR:ED:ET rough voxel ratio)
+  class_weights: [0.1, 1.0, 0.8, 1.2]
+  dice_log: false                           # Use log-Dice loss
+  label_smoothing: 0.0                      # Label smoothing for CE
+
+# ---------------------------------------------------------------------------
+# Optimiser
+# ---------------------------------------------------------------------------
+optimiser:
+  type: adamw
+  lr: 1.0e-3
+  weight_decay: 1.0e-5
+  betas: [0.9, 0.999]
+  eps: 1.0e-8
+
+# ---------------------------------------------------------------------------
+# Learning Rate Scheduler
+# ---------------------------------------------------------------------------
+scheduler:
+  type: cosine_warm                         # cosine_warm | plateau
+  t0: 50                                    # Restart period (epochs)
+  t_mult: 2                                 # Period multiplier at each restart
+  eta_min: 1.0e-6                           # Minimum learning rate
+  # plateau-specific (used when type=plateau)
+  plateau_patience: 10
+  plateau_factor: 0.5
+
+# ---------------------------------------------------------------------------
+# Training
+# ---------------------------------------------------------------------------
+training:
+  epochs: 200
+  use_amp: true                             # Mixed precision (CUDA only)
+  grad_clip: 1.0                            # Max gradient norm (0 to disable)
+  patience: 20                              # Early stopping patience (epochs)
+  save_every: 10                            # Save periodic checkpoints every N epochs
+  log_interval: 20                          # Log every N batches
+  num_classes: 4
+
+# ---------------------------------------------------------------------------
+# Evaluation
+# ---------------------------------------------------------------------------
+evaluation:
+  metrics: [dice, iou, hausdorff_95, sensitivity, specificity, volume_similarity]
+  brats_regions: true                       # Compute WT / TC / ET compound metrics
+  voxel_spacing: [1.0, 1.0, 1.0]           # mm spacing for HD95
+  compute_hd95: true
+  save_predictions: true
+  save_figures: true
+
+# ---------------------------------------------------------------------------
+# Explainability
+# ---------------------------------------------------------------------------
+explainability:
+  gradcam_enabled: true
+  attention_maps_enabled: true              # Only for attention_unet
+  mc_dropout_passes: 30                     # Monte Carlo dropout samples
+  uncertainty_threshold_pct: 90.0          # Percentile for flagging uncertain voxels
+
+# ---------------------------------------------------------------------------
+# Output
+# ---------------------------------------------------------------------------
+output:
+  base_dir: experiments
+  experiment_name: attention_unet_brats21_v1
+  # Full output path: {base_dir}/{experiment_name}/
+
+# ---------------------------------------------------------------------------
+# Reproducibility
+# ---------------------------------------------------------------------------
+reproducibility:
+  seed: 42
+  deterministic: true                       # torch.use_deterministic_algorithms(True)
+  benchmark: false                          # torch.backends.cudnn.benchmark
+
+# ---------------------------------------------------------------------------
+# Distributed Training (optional)
+# ---------------------------------------------------------------------------
+distributed:
+  enabled: false
+  backend: nccl
+  find_unused_parameters: false

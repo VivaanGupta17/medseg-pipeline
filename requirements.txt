@@ -1,0 +1,69 @@
+# =============================================================================
+# MedSeg Pipeline — Python Dependencies
+# =============================================================================
+# Install with: pip install -r requirements.txt
+# Requires Python 3.9+
+#
+# PyTorch must be installed separately with the correct CUDA version:
+#   pip install torch==2.0.1 torchvision==0.15.2 --index-url https://download.pytorch.org/whl/cu118
+
+# ---------------------------------------------------------------------------
+# Core Deep Learning
+# ---------------------------------------------------------------------------
+torch>=2.0.0
+torchvision>=0.15.0
+
+# ---------------------------------------------------------------------------
+# Medical Imaging
+# ---------------------------------------------------------------------------
+pydicom>=2.4.0              # DICOM file reading and metadata extraction
+nibabel>=5.1.0              # NIfTI / Analyze / MINC file I/O
+SimpleITK>=2.3.0            # Image resampling and registration utilities
+pylibjpeg>=1.4.0            # JPEG2000 DICOM transfer syntax support
+pylibjpeg-libjpeg>=1.3.4
+
+# ---------------------------------------------------------------------------
+# Scientific Computing
+# ---------------------------------------------------------------------------
+numpy>=1.24.0
+scipy>=1.10.0               # Morphological ops, resampling, spatial distance
+scikit-image>=0.20.0        # Image processing utilities
+scikit-learn>=1.2.0         # Metrics, cross-validation utilities
+pandas>=2.0.0               # CSV I/O, metric aggregation
+
+# ---------------------------------------------------------------------------
+# Visualisation
+# ---------------------------------------------------------------------------
+matplotlib>=3.7.0
+seaborn>=0.12.0
+Pillow>=9.5.0
+
+# ---------------------------------------------------------------------------
+# Training Infrastructure
+# ---------------------------------------------------------------------------
+tensorboard>=2.13.0         # Training curve logging
+pyyaml>=6.0                 # Configuration file parsing
+tqdm>=4.65.0                # Progress bars
+rich>=13.0.0                # Structured logging / console output
+
+# ---------------------------------------------------------------------------
+# Development & Testing
+# ---------------------------------------------------------------------------
+pytest>=7.3.0
+pytest-cov>=4.0.0
+black>=23.0.0               # Code formatting
+isort>=5.12.0               # Import sorting
+mypy>=1.2.0                 # Static type checking
+flake8>=6.0.0               # Linting
+
+# ---------------------------------------------------------------------------
+# Notebooks
+# ---------------------------------------------------------------------------
+jupyter>=1.0.0
+jupytext>=1.14.0            # Convert .py percent format ↔ .ipynb
+ipywidgets>=8.0.0
+
+# ---------------------------------------------------------------------------
+# Optional: MONAI (medical imaging framework, compatible with this pipeline)
+# ---------------------------------------------------------------------------
+# monai>=1.2.0
