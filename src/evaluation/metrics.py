@@ -1,3 +1,4 @@
+# Medical image segmentation evaluation metrics
 """Medical image segmentation evaluation metrics.
 
 Implements the full BraTS challenge evaluation suite:
