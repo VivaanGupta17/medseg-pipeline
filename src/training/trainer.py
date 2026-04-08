@@ -484,3 +484,5 @@ class Trainer:
         with open(self.output_dir / "training_summary.json", "w") as f:
             json.dump(summary, f, indent=2)
         logger.info("Training summary saved to %s", self.output_dir)
+
+# TODO: add gradient accumulation for larger effective batch
