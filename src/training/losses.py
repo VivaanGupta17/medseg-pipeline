@@ -122,6 +122,7 @@ class DiceLoss(nn.Module):
 
         dice = (2.0 * intersection + self.smooth) / (denominator + self.smooth)
 
+        # log-dice has better-behaved gradients early in training when dice ≈ 0
         if self.log_loss:
             loss_per_class = -torch.log(dice.clamp_min(1e-7))
         else:
